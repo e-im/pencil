@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
@@ -37,7 +38,8 @@ public class Pencil {
   private static CustomSearch customSearch;
   private static Methanol DiscordAPI;
   private static Methanol http;
-  private static TextChannel modMailChannel;
+  private static TextChannel batcave;
+  private static Role muted;
   private static TextChannel voiceLogChannel;
   private static TextChannel exploitNotificationChannel;
   private static String pasteggkey;
@@ -86,6 +88,7 @@ public class Pencil {
         new UsernameHandler(),
         new VoiceStateLogger(),
         new ExploitHandler(),
+        new SpamHandler(),
         client.build()
       )
       .build();
@@ -127,9 +130,10 @@ public class Pencil {
       5 * 1000, 300 * 1000
     );
 
+    muted = jda.getRoleById(System.getenv("MUTED_ROLE_ID"));
     customSearch = new CustomSearch(System.getenv("CUSTOMSEARCH_CX"), System.getenv("CUSTOMSEARCH_KEY"));
     pasteggkey = System.getenv("PASTE_GG_KEY");
-    modMailChannel = jda.getTextChannelById(System.getenv("MODMAIL_CHANNEL_ID"));
+    batcave = jda.getTextChannelById(System.getenv("BATCAVE_ID"));
     exploitNotificationChannel = jda.getTextChannelById(System.getenv("EXPLOIT_REPORT_CHANNEL_ID"));
     voiceLogChannel = jda.getTextChannelById(System.getenv("VOICE_LOG_CHANNEL_ID"));
   }
@@ -146,8 +150,12 @@ public class Pencil {
     return customSearch;
   }
 
-  public static TextChannel getModMailChannel() {
-    return modMailChannel;
+  public static TextChannel getBatcave() {
+    return batcave;
+  }
+
+  public static Role getMuted() {
+    return muted;
   }
 
   public static TextChannel getVoiceLogChannel() {

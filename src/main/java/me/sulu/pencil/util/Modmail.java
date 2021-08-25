@@ -10,7 +10,7 @@ public class Modmail {
     try {
       Iterable<String> result = Splitter.fixedLength(2000).split(message);
       String[] msgs = Iterables.toArray(result, String.class);
-      Pencil.getModMailChannel().sendMessage(
+      Pencil.getBatcave().sendMessage(
         String.format(
           "**New message from `%s` - %s (`%s`) - %s:**",
           user.getAsTag(),
@@ -20,7 +20,7 @@ public class Modmail {
         )
       ).queue();
       for (String msg : msgs) {
-        Pencil.getModMailChannel().sendMessage(msg).queue();
+        Pencil.getBatcave().sendMessage(msg).queue();
       }
     } catch (Exception e) {
       return false;

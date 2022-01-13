@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.user.update.UserUpdateNameEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class UsernameHandler extends ListenerAdapter {
+
   @Override
   public void onGuildMemberJoin(GuildMemberJoinEvent event) {
     Username.normalize(event.getMember());

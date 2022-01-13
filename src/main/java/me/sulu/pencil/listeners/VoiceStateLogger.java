@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import java.time.Instant;
 
 public class VoiceStateLogger extends ListenerAdapter {
+
   @Override
   public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
     Pencil.getVoiceLogChannel().sendMessageEmbeds(

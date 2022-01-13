@@ -7,7 +7,6 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.time.Instant;
 
@@ -27,7 +26,7 @@ public class CommandErrorHandler implements CommandListener {
   private MessageEmbed generateEmbed(Throwable th) {
     return new EmbedBuilder()
       .setTitle("An Error Occurred")
-      .setDescription("```java\n" + ExceptionUtils.getMessage(th) + "```")
+      .setDescription("```java\n%s: %s```".formatted(th.getClass().getName(), th.getMessage()))
       .setTimestamp(Instant.now())
       .setColor(9966604)
       .build();

@@ -3,9 +3,9 @@ package me.sulu.pencil.commands;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.menu.EmbedPaginator;
+import me.sulu.pencil.Pencil;
 import me.sulu.pencil.util.customsearch.entity.Item;
 import me.sulu.pencil.util.customsearch.entity.Result;
-import me.sulu.pencil.Pencil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
@@ -34,7 +34,7 @@ public class GoogleCommand extends SlashCommand {
       new OptionData(OptionType.STRING, "term", "Search term").setRequired(true)
     );
     this.guildOnly = true;
-    this.botPermissions = new Permission[]{Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_MANAGE};
+    this.botPermissions = new Permission[]{Permission.MESSAGE_SEND, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_MANAGE};
   }
 
   @Override
@@ -72,7 +72,7 @@ public class GoogleCommand extends SlashCommand {
         }
       });
 
-    if (result.getItems() == null) {
+    if (result.items() == null) {
       epb.addItems(
         new EmbedBuilder()
           .setColor(15167313)
@@ -83,13 +83,13 @@ public class GoogleCommand extends SlashCommand {
       return epb.build();
     }
 
-    for (Item item : result.getItems()) {
+    for (Item item : result.items()) {
       MessageEmbed embed = new EmbedBuilder()
-        .setTitle(item.getTitle(), item.getLink())
+        .setTitle(item.title(), item.link())
         .setColor(2508371)
-        .setThumbnail("https://favicon.sulu.me/icon.png?url=http://" + item.getDisplayLink())
-        .setDescription(item.getLink() + "\n\n" + item.getSnippet().replace("\n", ""))
-        .setFooter("Requested by " + user.getName() + " - About " + result.getSearchInformation().getFormattedTotalResults() + " results (" + result.getSearchInformation().getFormattedSearchTime() + " seconds)", user.getEffectiveAvatarUrl())
+        .setThumbnail("https://favicon.sulu.me/icon.png?url=" + item.displayLink())
+        .setDescription(item.link() + "\n\n" + item.snippet().replace("\n", ""))
+        .setFooter("Requested by " + user.getName() + " - About " + result.searchInformation().formattedTotalResults() + " results (" + result.searchInformation().formattedSearchTime() + " seconds)", user.getEffectiveAvatarUrl())
         .build();
       epb.addItems(embed);
     }

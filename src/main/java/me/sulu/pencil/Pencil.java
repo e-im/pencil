@@ -1,50 +1,48 @@
 package me.sulu.pencil;
 
-import com.github.mizosoft.methanol.Methanol;
-import com.github.mizosoft.methanol.MutableRequest;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import me.sulu.pencil.util.customsearch.CustomSearch;
-import me.sulu.pencil.commands.DmCommand;
-import me.sulu.pencil.commands.GoogleCommand;
-import me.sulu.pencil.commands.ModmailCommand;
-import me.sulu.pencil.commands.PingCommand;
+import me.sulu.pencil.commands.*;
 import me.sulu.pencil.listeners.*;
+import me.sulu.pencil.util.customsearch.CustomSearch;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import org.json.JSONArray;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.security.auth.login.LoginException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class Pencil {
+  private static final SpamHandler spamHandler = new SpamHandler();
+  private static final ObjectMapper mapper = new JsonMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   public static boolean DEVELOPMENT = System.getenv("DEVELOPMENT") != null;
+  public static Logger LOGGER = LogManager.getLogger();
   private static JDA jda;
   private static EventWaiter waiter;
   private static CustomSearch customSearch;
-  private static Methanol DiscordAPI;
-  private static Methanol http;
+  private static HttpClient http;
   private static TextChannel batcave;
-  private static Role muted;
   private static TextChannel voiceLogChannel;
   private static TextChannel exploitNotificationChannel;
-  private static String pasteggkey;
-  private static final Gson gson = new Gson();
-  private static final Timer timer = new Timer();
 
   public static void main(String[] args) throws LoginException, InterruptedException {
     waiter = new EventWaiter();
@@ -58,7 +56,8 @@ public class Pencil {
       .addCommands(
         new GoogleCommand(),
         new PingCommand(),
-        new DmCommand()
+        new DmCommand(),
+        new PhishCommand()
       )
       .addSlashCommands(
         new GoogleCommand(),
@@ -88,51 +87,39 @@ public class Pencil {
         new UsernameHandler(),
         new VoiceStateLogger(),
         new ExploitHandler(),
-        new SpamHandler(),
+        spamHandler,
         client.build()
       )
       .build();
 
     jda.awaitReady();
 
-    DiscordAPI = Methanol.newBuilder()
-      .baseUri("https://discord.com/api/v9/")
+    http = HttpClient.newBuilder()
       .executor(Executors.newFixedThreadPool(4))
-      .connectTimeout(Duration.ofSeconds(5))
-      .readTimeout(Duration.ofSeconds(10))
-      .defaultHeader("Authorization", jda.getToken())
+      .connectTimeout(Duration.ofSeconds(10))
       .build();
 
-    http = Methanol.newBuilder()
-      .executor(Executors.newFixedThreadPool(4))
-      .readTimeout(Duration.ofSeconds(10))
-      .build();
+    Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
+      () -> {
+        try {
+          ArrayNode root = (ArrayNode) mapper.readTree(
+            Pencil.http.send(
+              HttpRequest.newBuilder(URI.create("https://bstats.org/api/v1/plugins/580/charts/servers/data")).build(),
+              HttpResponse.BodyHandlers.ofString()
+            ).body()
+          );
 
-    timer.schedule(
-      new TimerTask() {
-        @Override
-        public void run() {
-          JSONArray servers;
-          try {
-            servers = new JSONArray(
-              Pencil.http.send(
-                MutableRequest.GET("https://bstats.org/api/v1/plugins/580/charts/servers/data"),
-                HttpResponse.BodyHandlers.ofString()
-              ).body()
-            );
-            String serverCount = new DecimalFormat("#,###").format(servers.getJSONArray(servers.length() - 1).getInt(1));
-            jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing("on " + serverCount + " servers."));
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
+          jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing("on " + new DecimalFormat("#,###").format(root.get(root.size() - 1).get(1).asInt()) + " servers"));
+        } catch (Exception e) {
+          LOGGER.warn("Failed to fetch data from bStats", e);
         }
       },
-      5 * 1000, 300 * 1000
+      15,
+      300,
+      TimeUnit.SECONDS
     );
 
-    muted = jda.getRoleById(System.getenv("MUTED_ROLE_ID"));
     customSearch = new CustomSearch(System.getenv("CUSTOMSEARCH_CX"), System.getenv("CUSTOMSEARCH_KEY"));
-    pasteggkey = System.getenv("PASTE_GG_KEY");
     batcave = jda.getTextChannelById(System.getenv("BATCAVE_ID"));
     exploitNotificationChannel = jda.getTextChannelById(System.getenv("EXPLOIT_REPORT_CHANNEL_ID"));
     voiceLogChannel = jda.getTextChannelById(System.getenv("VOICE_LOG_CHANNEL_ID"));
@@ -154,10 +141,6 @@ public class Pencil {
     return batcave;
   }
 
-  public static Role getMuted() {
-    return muted;
-  }
-
   public static TextChannel getVoiceLogChannel() {
     return voiceLogChannel;
   }
@@ -166,19 +149,15 @@ public class Pencil {
     return exploitNotificationChannel;
   }
 
-  public static Methanol getDiscordAPI() {
-    return DiscordAPI;
-  }
-
-  public static Methanol getHTTP() {
+  public static HttpClient getHTTP() {
     return http;
   }
 
-  public static String getPasteggkey() {
-    return pasteggkey;
+  public static ObjectMapper getMapper() {
+    return mapper;
   }
 
-  public static Gson getGson() {
-    return gson;
+  public static SpamHandler getSpamHandler() {
+    return spamHandler;
   }
 }

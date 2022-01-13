@@ -6,7 +6,6 @@ import me.sulu.pencil.util.Argument;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class DmCommand extends Command {
   public DmCommand() {
@@ -16,7 +15,7 @@ public class DmCommand extends Command {
     this.help = "Sends a message to the specified user as the bot.";
     this.guildOnly = true;
     this.userPermissions = new Permission[]{Permission.MESSAGE_MANAGE};
-    this.botPermissions = new Permission[]{Permission.MESSAGE_WRITE};
+    this.botPermissions = new Permission[]{Permission.MESSAGE_SEND};
   }
 
   @Override
@@ -45,10 +44,7 @@ public class DmCommand extends Command {
   }
 
   private void fail(Message m, Throwable t) {
-    m.reply(String.format(
-      "```java\n%s```",
-      ExceptionUtils.getMessage(t)
-    )).queue();
+    m.reply("```java\n%s: %s```".formatted(t.getClass().getName(), t.getMessage())).queue();
   }
 
   protected void success(Message m, String content, User user) {

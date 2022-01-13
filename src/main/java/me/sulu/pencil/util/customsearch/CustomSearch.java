@@ -1,18 +1,20 @@
 package me.sulu.pencil.util.customsearch;
 
-import com.github.mizosoft.methanol.MutableRequest;
-import me.sulu.pencil.util.customsearch.entity.Result;
 import me.sulu.pencil.Pencil;
+import me.sulu.pencil.util.customsearch.entity.Result;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 import static java.lang.String.format;
 
 public class CustomSearch {
+  public static final Logger LOGGER = LogManager.getLogger();
   private final String cx;
   private final String key;
 
@@ -30,14 +32,7 @@ public class CustomSearch {
     );
   }
 
-  public Result executeSearch(String term) throws ExecutionException, InterruptedException {
-    String data = Pencil.getHTTP().sendAsync(
-      MutableRequest.GET(this.getUrl(term)),
-      HttpResponse.BodyHandlers.ofString()
-    )
-      .thenApply(HttpResponse::body)
-      .get();
-
-    return Pencil.getGson().fromJson(data, Result.class);
+  public Result executeSearch(String term) throws IOException {
+    return Pencil.getMapper().readValue(new URL(getUrl(term)), Result.class);
   }
 }

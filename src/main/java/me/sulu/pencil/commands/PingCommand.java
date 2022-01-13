@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.Permission;
 public class PingCommand extends Command {
   public PingCommand() {
     this.name = "ping";
-    this.botPermissions = new Permission[]{Permission.MESSAGE_WRITE, Permission.MESSAGE_EMBED_LINKS};
+    this.botPermissions = new Permission[]{Permission.MESSAGE_SEND, Permission.MESSAGE_EMBED_LINKS};
     this.guildOnly = true;
   }
 

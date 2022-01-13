@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 
 public class DirectMessageHandler extends ListenerAdapter {
+
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
     if (event.getMessage().getAuthor().isBot()) return;

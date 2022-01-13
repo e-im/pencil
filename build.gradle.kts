@@ -10,26 +10,34 @@ application {
 
 repositories {
   mavenCentral()
-  maven("https://m2.dv8tion.net/releases")
-  maven("https://m2.chew.pro/releases")
+  maven("https://m2.chew.pro/snapshots")
+  maven("https://jitpack.io")
 }
 
 dependencies {
-  implementation("com.github.mizosoft.methanol", "methanol", "1.6.0")
-  implementation("net.dv8tion:JDA:4.3.0_346") {
+  implementation("com.github.DV8FromTheWorld", "JDA", "master-SNAPSHOT") {
     exclude(module = "opus-java")
+    exclude("com.fasterxml")
   }
-  implementation("pw.chew:jda-chewtils:1.23.0")
-  implementation("ch.qos.logback:logback-classic:1.2.10")
-  implementation("com.google.code.gson:gson:2.8.9")
-  implementation("com.google.guava:guava:31.0.1-jre")
-  implementation("org.apache.commons:commons-lang3:3.12.0")
-  implementation("org.json:json:20210307")
-  implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
+  implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
+  implementation("org.apache.logging.log4j", "log4j-core", "2.17.1")
+  implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.17.1")
+  implementation("com.fasterxml.jackson.core", "jackson-databind", "2.13.1")
+  implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.5")
+}
+
+tasks {
+  jar {
+    manifest {
+      attributes(
+        "Multi-Release" to "true"
+      )
+    }
+  }
 }
 
 java {
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(16))
+    languageVersion.set(JavaLanguageVersion.of(17))
   }
 }

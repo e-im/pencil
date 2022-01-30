@@ -3,6 +3,7 @@ package me.sulu.pencil;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -26,12 +27,16 @@ import java.time.Duration;
 
 public class Pencil {
   private final Logger LOGGER = Loggers.getLogger(Pencil.class);
-  private final ObjectMapper JSON_MAPPER = new JsonMapper()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-  private final ObjectMapper XML_MAPPER = new XmlMapper()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-  private final ObjectMapper YAML_MAPPER = new YAMLMapper()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  private final ObjectMapper JSON_MAPPER = JsonMapper.builder()
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
+    .build();
+  private final ObjectMapper XML_MAPPER = XmlMapper.xmlBuilder()
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .build();
+  private final ObjectMapper YAML_MAPPER = YAMLMapper.builder()
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .build();
 
   private final HttpClient HTTP = HttpClient.create();
 
@@ -39,7 +44,7 @@ public class Pencil {
   @Parameter(names = {"--config", "-c"}, description = "Configuration file path")
   private String configFileName = "config.yaml";
 
-  @Parameter(names = {"--token", "-t"}, description = "Discord Bot Token")
+  @Parameter(names = {"--token", "-t"}, description = "Discord Bot Token", password = true)
   private String token;
 
   private Config config;

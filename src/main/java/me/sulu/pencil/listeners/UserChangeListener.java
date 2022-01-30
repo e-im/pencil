@@ -65,7 +65,7 @@ public class UserChangeListener {
       newName = StringUtil.randomName();
     }
 
-    newName = StringUtil.left(newName, 31);
+    newName = StringUtil.left(newName, 32);
 
     if (newName.equals(member.getDisplayName())) return Mono.empty();
 

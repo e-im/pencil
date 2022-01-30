@@ -1,4 +1,4 @@
-package me.sulu.pencil.util.customsearch.entity;
+package me.sulu.pencil.apis.customsearch.entity;
 
 import java.util.Objects;
 

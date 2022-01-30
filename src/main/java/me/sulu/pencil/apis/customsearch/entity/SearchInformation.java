@@ -1,4 +1,4 @@
-package me.sulu.pencil.util.customsearch.entity;
+package me.sulu.pencil.apis.customsearch.entity;
 
 public record SearchInformation(
   double searchTime,

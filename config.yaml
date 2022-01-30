@@ -1,0 +1,82 @@
+config:
+  secrets:
+    pastegg-key: ""
+    custom-search:
+      cx: ""
+      key: ""
+  domain-allowlist:
+    - "google.com"
+    - "github.com"
+    - "githubusercontent.com"
+    - "raw.githubusercontent.com"
+    - "appspot.com"
+    - "pastebin.com"
+    - "paste.gg"
+    - "pastes.dev"
+    - "discord.com"
+    - "cdn.discordapp.com"
+    - "dis.gd"
+    - "discord.co"
+    - "discord.design"
+    - "discord.dev"
+    - "discord.gg"
+    - "discord.gift"
+    - "discord.gifts"
+    - "discord.new"
+    - "discord.store"
+    - "discord.tools"
+    - "discord.media"
+    - "discordapp.com"
+    - "discordapp.net"
+    - "discordmerch.com"
+    - "discordpartygames.com"
+    - "discord-activities.com"
+    - "discordactivities.com"
+    - "discordsays.com"
+    - "discordapp.io"
+    - "discordcdn.com"
+    - "discordstatus.com"
+    - "githubstatus.com"
+guilds:
+  # PaperMC
+  289587909051416579:
+    channels:
+      modmail: 919337326793076806
+      auto-action-log: 821813386601824296
+      voice-log: 853089124957159445
+      exploit-report: 869845853093916672
+    features:
+      commands:
+        modmail: false
+        google: false
+      file-uploading: true
+      name-normalization:
+        normalize: true
+        aggressive: false
+        dehoist: true
+      phishing:
+        enabled: true
+        domain-spam:
+          channels: 3
+          uniques: 5
+  # Dev Guild
+  813986250373464066:
+    channels:
+      modmail: 937098197925511248
+      auto-action-log: 937158362519437332
+      voice-log: 937196485588705290
+      exploit-report: 869672804809854976
+    features:
+      commands:
+        modmail: true
+        google: true
+      file-uploading: true
+      name-normalization:
+        normalize: true
+        aggressive: false
+        dehoist: true
+      phishing:
+        enabled: true
+        domain-spam:
+          channels: 2
+          uniques: 3

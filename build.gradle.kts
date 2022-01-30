@@ -5,25 +5,38 @@ plugins {
 }
 
 application {
-  mainClass.set("me.sulu.pencil.Pencil")
+  mainClass.set("me.sulu.pencil.Main")
 }
 
 repositories {
   mavenCentral()
-  maven("https://m2.chew.pro/snapshots")
-  maven("https://jitpack.io")
+  maven("https://oss.sonatype.org/content/repositories/snapshots/")
+  maven("https://jitpack.io") {
+    content {
+      includeGroup("com.github.anyascii")
+    }
+  }
 }
 
 dependencies {
-  implementation("com.github.DV8FromTheWorld", "JDA", "master-SNAPSHOT") {
-    exclude(module = "opus-java")
+  implementation("com.discord4j", "discord4j-core", "3.3.0-SNAPSHOT") {
     exclude("com.fasterxml")
+    exclude("com.github.ben-manes.caffeine")
   }
-  implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
-  implementation("org.apache.logging.log4j", "log4j-core", "2.17.1")
-  implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.17.1")
+
+  implementation("ch.qos.logback", "logback-classic", "1.2.10")
+
   implementation("com.fasterxml.jackson.core", "jackson-databind", "2.13.1")
+  implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.13.1")
+  implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", "2.13.1")
+
   implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.5")
+
+  implementation("com.beust", "jcommander", "1.82")
+
+  implementation("io.github.classgraph", "classgraph", "4.8.138")
+
+  implementation("com.github.anyascii", "anyascii", "0.3.0")
 }
 
 tasks {

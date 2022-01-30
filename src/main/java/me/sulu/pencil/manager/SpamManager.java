@@ -81,7 +81,7 @@ public class SpamManager {
   }
 
   private Mono<SpamResponse> check(Message message) {
-    if (message.getGuildId().isEmpty() || message.getAuthor().isEmpty() || message.getAuthor().get().isBot()) {
+    if (message.getGuildId().isEmpty() || message.getAuthor().isPresent() && message.getAuthor().get().isBot()) {
       return Mono.empty();
     }
 
@@ -145,41 +145,44 @@ public class SpamManager {
   }
 
   private Mono<Void> caught(Message message, SpamResponse reason) {
-    Mono<Void> delete = message.delete("Possible spam");
-
-    if (message.getAuthor().isEmpty() || message.getGuildId().isEmpty()) {
+    if (message.getGuildId().isEmpty()) {
       return Mono.empty();
     }
-    final User user = message.getAuthor().get();
 
-    return message.getAuthorAsMember()
-      .flatMap(member -> member.getGuild()
-        .flatMap(guild -> member.getPrivateChannel()
-          .flatMap(channel -> channel.createMessage(EmbedCreateSpec.builder()
-              .title("Are you a robot?")
-              .thumbnail(guild.getIconUrl(Image.Format.PNG).orElse(""))
-              .description("You have been automatically kicked for bot-like activity. Please ensure your Discord account is secure.")
-              .addFields(EmbedCreateFields.Field.of("Message", "```\n%s\n```".formatted(StringUtil.left(message.getContent().replace("```", ""), 500)), false))
-              .addFields(EmbedCreateFields.Field.of("Reason", reason.reason(), false))
-              .build()
+    Mono<Void> delete = message.delete("Possible spam");
+
+    if (message.getAuthor().isPresent()) {
+      final User user = message.getAuthor().get();
+      return delete.and(message.getAuthorAsMember()
+        .flatMap(member -> member.getGuild()
+          .flatMap(guild -> member.getPrivateChannel()
+            .flatMap(channel -> channel.createMessage(EmbedCreateSpec.builder()
+                .title("Are you a robot?")
+                .thumbnail(guild.getIconUrl(Image.Format.PNG).orElse(""))
+                .description("You have been automatically kicked for bot-like activity. Please ensure your Discord account is secure.")
+                .addFields(EmbedCreateFields.Field.of("Message", "```\n%s\n```".formatted(StringUtil.left(message.getContent().replace("```", ""), 500)), false))
+                .addFields(EmbedCreateFields.Field.of("Reason", reason.reason(), false))
+                .build()
+              )
             )
+            .then(member.kick("Possible spam"))
           )
-          .then(member.kick("Possible spam"))
         )
-      )
-      .and(this.pencil.client().rest()
-        .getChannelById(Snowflake.of(this.pencil.config().guild(message.getGuildId().get()).channels().autoActionLog()))
-        .createMessage(EmbedCreateSpec.builder()
-          .author(user.getTag(), null, user.getAvatarUrl())
-          .title("User kicked for possible spam")
-          .addField("Last Message", "```\n%s\n```".formatted(StringUtil.left(message.getContent(), 500).replace("```", "")), false)
-          .addField("Reason", reason.reason(), false)
-          .addField("Mention", user.getMention(), false)
-          .build()
-          .asRequest()
-        )
-      )
-      .and(delete);
+        .and(this.pencil.client().rest()
+          .getChannelById(Snowflake.of(this.pencil.config().guild(message.getGuildId().get()).channels().autoActionLog()))
+          .createMessage(EmbedCreateSpec.builder()
+            .author(user.getTag(), null, user.getAvatarUrl())
+            .title("User kicked for possible spam")
+            .addField("Last Message", "```\n%s\n```".formatted(StringUtil.left(message.getContent(), 500).replace("```", "")), false)
+            .addField("Reason", reason.reason(), false)
+            .addField("Mention", user.getMention(), false)
+            .build()
+            .asRequest()
+          )
+        ));
+    }
+
+    return delete;
   }
 
 

@@ -11,8 +11,8 @@ public class SpamListener {
 
   public SpamListener(Pencil pencil) {
     this.manager = new SpamManager(pencil);
-    pencil.client().on(MessageCreateEvent.class, this::on).subscribe();
-    pencil.client().on(MessageUpdateEvent.class, this::on).subscribe();
+    pencil.on(MessageCreateEvent.class, this::on).subscribe();
+    pencil.on(MessageUpdateEvent.class, this::on).subscribe();
   }
 
   public Mono<Void> on(MessageCreateEvent event) {

@@ -13,7 +13,7 @@ public class VoiceStateListener {
 
   public VoiceStateListener(Pencil pencil) {
     this.pencil = pencil;
-    this.pencil.client().on(VoiceStateUpdateEvent.class, this::on).subscribe();
+    this.pencil.on(VoiceStateUpdateEvent.class, this::on).subscribe();
   }
 
   private Mono<Void> on(VoiceStateUpdateEvent event) {

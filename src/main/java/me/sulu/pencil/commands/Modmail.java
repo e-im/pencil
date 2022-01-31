@@ -3,15 +3,17 @@ package me.sulu.pencil.commands;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import me.sulu.pencil.Pencil;
 import me.sulu.pencil.util.StringUtil;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 public class Modmail extends Command {
+  private static final Logger LOGGER = Loggers.getLogger(Modmail.class);
   private final ApplicationCommandRequest request = ApplicationCommandRequest.builder()
     .name("modmail")
     .description("Send a private message to the moderators")
@@ -47,15 +49,25 @@ public class Modmail extends Command {
       content = event.getOption("message").get().getValue().get().asString();
     }
 
-    return pencil().client().getChannelById(Snowflake.of(this.pencil().config().guild(id).channels().modmail()))
-      .map(channel -> (TextChannel) channel)
-      .flatMap(channel -> channel.createMessage(EmbedCreateSpec.builder()
+    final long modmailChannelId = this.pencil().config().guild(id).channels().modmail();
+
+    if (modmailChannelId == 0L) {
+      return event.getInteraction().getGuild()
+        .flatMap(guild -> event.reply(guild.getName() + " has not properly configured modmail. Please contact a moderator directly.").withEphemeral(true));
+    }
+
+    return this.pencil().client().rest().getChannelById(Snowflake.of(modmailChannelId)).createMessage(EmbedCreateSpec.builder()
         .title("New Modmail Message")
         .author(event.getInteraction().getUser().getTag(), null, event.getInteraction().getUser().getAvatarUrl())
         .description(StringUtil.left(content, 4096))
         .build()
-      ))
-      .flatMap(__ -> event.reply("Successfully messaged the moderators.").withEphemeral(true));
+        .asRequest()
+      )
+      .then(event.reply("Successfully messaged the moderators.").withEphemeral(true))
+      .onErrorResume(t -> {
+        LOGGER.warn("Failed to deliver modmail message", t);
+        return event.reply("Failed to deliver message. Please contact a moderator directly.");
+      });
   }
 
   @Override

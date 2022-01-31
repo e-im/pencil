@@ -1,13 +1,11 @@
 package me.sulu.pencil.commands;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputAutoCompleteEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
-import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.MessageEditSpec;
@@ -20,6 +18,7 @@ import me.sulu.pencil.apis.customsearch.GoogleCustomSearch;
 import me.sulu.pencil.apis.customsearch.entity.Item;
 import me.sulu.pencil.apis.customsearch.entity.Result;
 import me.sulu.pencil.apis.customsearch.entity.SearchInformation;
+import me.sulu.pencil.util.Emojis;
 import me.sulu.pencil.util.StringUtil;
 import reactor.core.publisher.Mono;
 
@@ -33,7 +32,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeoutException;
 
 public class Google extends Command {
-  private final ReactionEmoji googleEmoji = ReactionEmoji.custom(Snowflake.of(937078670223347752L), "google", false);
   private final ApplicationCommandRequest request = ApplicationCommandRequest.builder()
     .name("google")
     .description("Search the web")
@@ -123,7 +121,7 @@ public class Google extends Command {
       Item item = result.items().get(i);
       SelectMenu.Option option = SelectMenu.Option.of(StringUtil.left(item.displayLink().replace("www.", "") + " - " + item.title(), 100), Integer.toString(i))
         .withDescription(StringUtil.left(item.snippet(), 70))
-        .withEmoji(googleEmoji);
+        .withEmoji(Emojis.GOOGLE);
 
       if (i == current) option = option.withDefault(true);
 

@@ -10,6 +10,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.concurrent.TimeoutException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -20,11 +21,14 @@ public class AttachmentListener {
   public AttachmentListener(Pencil pencil) {
     this.pencil = pencil;
     this.pasteGG = new PasteGG(pencil);
-    this.pencil.client().on(MessageCreateEvent.class, this::on).subscribe();
+    this.pencil.on(MessageCreateEvent.class, this::on).subscribe();
   }
 
   private Mono<Void> on(MessageCreateEvent event) {
-    if (event.getGuildId().isEmpty() || event.getMessage().getAuthor().isEmpty() || event.getMessage().getAuthor().get().isBot()) {
+    if (event.getGuildId().isEmpty()
+      || event.getMessage().getAuthor().isEmpty()
+      || event.getMessage().getAuthor().get().isBot()
+      || !this.pencil.config().guild(event.getGuildId().get()).features().fileUploading()) {
       return Mono.empty();
     }
 
@@ -39,8 +43,9 @@ public class AttachmentListener {
         .aggregate()
         .asByteArray()
         .timeout(Duration.ofSeconds(6))
+        .onErrorResume(TimeoutException.class, ignored -> Mono.empty())
         .zipWhen(bytes -> Mono.just(new String(bytes, UTF_8)))
-        .filter(tuple -> Arrays.equals(tuple.getT1(), tuple.getT2().getBytes(UTF_8)))
+        .filter(tuple -> Arrays.equals(tuple.getT1(), tuple.getT2().getBytes(UTF_8))) // Checks if this is actually something we want to pastebin. TODO: Find something better/faster?
         .flatMap(content -> this.pasteGG.pastebin("Content by %s (%s)".formatted(author.getTag(), author.getId().asString()), "", attachment.getFilename(), content.getT2()))
         .zipWith(event.getMessage().getChannel())
         .flatMap(tuple -> tuple.getT2().createMessage("%s by %s: %s".formatted(attachment.getFilename(), author.getMention(), tuple.getT1()))

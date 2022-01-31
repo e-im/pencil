@@ -42,6 +42,18 @@ public class Config {
     }
   }
 
+  public boolean hasGuild(final long id) {
+    return this.guilds.containsKey(id);
+  }
+
+  public boolean hasGuild(final Snowflake id) {
+    return this.hasGuild(id.asLong());
+  }
+
+  public boolean hasGuild(final Guild guild) {
+    return this.hasGuild(guild.getId());
+  }
+
   public GuildConfig guild(final long id) {
     final GuildConfig config = this.guilds.get(id);
     if (config == null) {

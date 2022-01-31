@@ -19,9 +19,9 @@ public class UserChangeListener {
 
   public UserChangeListener(Pencil pencil) {
     this.pencil = pencil;
-    this.pencil.client().on(MemberChunkEvent.class, this::on).subscribe();
-    this.pencil.client().on(MemberJoinEvent.class, this::on).subscribe();
-    this.pencil.client().on(MemberUpdateEvent.class, this::on).subscribe();
+    this.pencil.on(MemberChunkEvent.class, this::on).subscribe();
+    this.pencil.on(MemberJoinEvent.class, this::on).subscribe();
+    this.pencil.on(MemberUpdateEvent.class, this::on).subscribe();
   }
 
 

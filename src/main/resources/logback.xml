@@ -3,6 +3,7 @@
   <logger name="io.netty" level="INFO"/>
   <logger name="reactor" level="INFO"/>
   <logger name="discord4j.gateway.DefaultGatewayClient" level="INFO"/>
+  <logger name="discord4j.rest.request.RequestStream" level="INFO"/>
 
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <withJansi>true</withJansi>
@@ -14,7 +15,7 @@
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <fileNamePattern>logs/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-      <maxFileSize>100MB</maxFileSize>
+      <maxFileSize>2MB</maxFileSize>
       <maxHistory>90</maxHistory>
     </rollingPolicy>
     <encoder>

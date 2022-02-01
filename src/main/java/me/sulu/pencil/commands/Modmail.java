@@ -6,11 +6,14 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.util.Color;
 import me.sulu.pencil.Pencil;
 import me.sulu.pencil.util.StringUtil;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+
+import java.time.Instant;
 
 public class Modmail extends Command {
   private static final Logger LOGGER = Loggers.getLogger(Modmail.class);
@@ -60,6 +63,9 @@ public class Modmail extends Command {
         .title("New Modmail Message")
         .author(event.getInteraction().getUser().getTag(), null, event.getInteraction().getUser().getAvatarUrl())
         .description(StringUtil.left(content, 4096))
+        .color(Color.SUBMARINE)
+        .footer("User ID: " + event.getInteraction().getUser().getId().asString(), null)
+        .timestamp(Instant.now())
         .build()
         .asRequest()
       )

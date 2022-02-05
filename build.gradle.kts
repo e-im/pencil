@@ -34,8 +34,6 @@ dependencies {
 
   implementation("com.beust", "jcommander", "1.82")
 
-  implementation("io.github.classgraph", "classgraph", "4.8.138")
-
   implementation("com.github.anyascii", "anyascii", "0.3.0")
 }
 

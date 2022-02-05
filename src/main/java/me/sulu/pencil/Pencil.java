@@ -16,6 +16,8 @@ import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.gateway.intent.IntentSet;
 import discord4j.rest.util.AllowedMentions;
+import me.sulu.pencil.commands.Google;
+import me.sulu.pencil.commands.Modmail;
 import me.sulu.pencil.listeners.*;
 import me.sulu.pencil.manager.CommandManager;
 import me.sulu.pencil.util.Config;
@@ -27,6 +29,7 @@ import reactor.util.Loggers;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Set;
 import java.util.function.Function;
 
 public class Pencil {
@@ -79,7 +82,10 @@ public class Pencil {
       .doOnNext(ready -> LOGGER.info("Successfully logged in as {}", ready.getSelf().getTag()))
       .subscribe();
 
-    new CommandManager(this);
+    new CommandManager(this, Set.of(
+      new Google(this),
+      new Modmail(this)
+    ));
 
     new SpamListener(this);
     new AttachmentListener(this);
@@ -89,7 +95,7 @@ public class Pencil {
     new DirectMessageListener(this);
     new GuildListener(this);
 
-    this.client().onDisconnect().log().block();
+    this.client().onDisconnect().block();
   }
 
   public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {

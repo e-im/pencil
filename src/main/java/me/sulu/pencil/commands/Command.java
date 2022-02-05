@@ -24,10 +24,7 @@ public abstract class Command {
   public abstract Mono<Void> execute(ChatInputInteractionEvent event);
 
   public Mono<Void> complete(ChatInputAutoCompleteEvent event) {
-    if (this.request().options().get().stream().anyMatch(option -> option.autocomplete().get())) {
-      return event.respondWithSuggestions(Collections.emptyList());
-    }
-    return Mono.empty();
+    return event.respondWithSuggestions(Collections.emptyList());
   }
 
   public abstract ApplicationCommandRequest request();

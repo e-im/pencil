@@ -9,6 +9,7 @@ import discord4j.core.object.component.SelectMenu;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.util.Color;
@@ -133,12 +134,14 @@ public class Google extends Command {
 
   @Override
   public Mono<Void> complete(ChatInputAutoCompleteEvent event) {
-    String term = event.getFocusedOption().getValue().orElseThrow().asString();
-    if (term.length() == 0) {
+    final String term = event.getFocusedOption().getValue().orElseThrow().asString();
+    if (term.length() == 0 || term.isBlank()) {
       return event.respondWithSuggestions(Collections.emptyList());
     }
 
     return this.completer.complete(term)
+      .map(suggestion -> ApplicationCommandOptionChoiceData.builder().name(suggestion).value(suggestion).build())
+      .cast(ApplicationCommandOptionChoiceData.class)
       .collectList()
       .flatMap(event::respondWithSuggestions);
   }

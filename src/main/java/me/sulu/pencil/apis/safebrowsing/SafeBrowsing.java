@@ -46,7 +46,8 @@ public class SafeBrowsing {
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
-      });
+      })
+      .doOnNext(sbs -> this.cache.put(url, sbs));
   }
 
   public record SafeBrowsingStatus(

@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.*;
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SpamManager {
   private static final Logger LOGGER = Loggers.getLogger(SpamManager.class);
+  private static final String IDENTITY = "Pencil (github.com/PaperMC)";
 
   private final Pencil pencil;
   private final Set<String> domains = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -38,7 +40,7 @@ public class SpamManager {
     this.safeBrowsing = new SafeBrowsing(pencil);
 
     final Mono<Void> websocket = this.pencil.http()
-      .headers(headers -> headers.add("X-Identity", "Pencil Discord Bot (PaperMC)"))
+      .headers(headers -> headers.add("X-Identity", IDENTITY))
       .websocket()
       .uri("wss://phish.sinking.yachts/feed")
       .receive()
@@ -56,10 +58,11 @@ public class SpamManager {
           LOGGER.warn("Failed to handle update from sinking.yachts", e);
         }
       })
+      .retryWhen(Retry.backoff(10, Duration.ofSeconds(5)))
       .then();
 
     this.pencil.http()
-      .headers(headers -> headers.add("X-Identity", "Pencil Discord Bot (PaperMC)"))
+      .headers(headers -> headers.add("X-Identity", IDENTITY))
       .get()
       .uri("https://phish.sinking.yachts/v2/text")
       .responseContent()

@@ -32,8 +32,6 @@ dependencies {
 
   implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.5")
 
-  implementation("com.beust", "jcommander", "1.82")
-
   implementation("com.github.anyascii", "anyascii", "0.3.0")
 }
 

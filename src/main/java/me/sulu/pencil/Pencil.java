@@ -1,7 +1,5 @@
 package me.sulu.pencil;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +27,7 @@ import reactor.util.Loggers;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -47,25 +46,13 @@ public class Pencil {
 
   private final HttpClient HTTP = HttpClient.create();
 
-  @SuppressWarnings("FieldMayBeFinal")
-  @Parameter(names = {"--config", "-c"}, description = "Configuration file path")
-  private String configFileName = "config.yaml";
-
-  @Parameter(names = {"--token", "-t"}, description = "Discord Bot Token", password = true)
-  private String token;
-
   private Config config;
   private GatewayDiscordClient client;
 
-  public void start(final String[] args) {
-    JCommander.newBuilder()
-      .addObject(this)
-      .build()
-      .parse(args);
+  public void start() {
+    this.config = new Config(YAML_MAPPER, Path.of(Objects.requireNonNullElse(System.getenv("PENCIL_CONFIG_FILE"), "config.yaml")));
 
-    this.config = new Config(YAML_MAPPER, Path.of(configFileName));
-
-    this.client = DiscordClientBuilder.create(token)
+    this.client = DiscordClientBuilder.create(System.getenv("PENCIL_DISCORD_TOKEN"))
       .setDefaultAllowedMentions(AllowedMentions.suppressAll())
       .build()
       .gateway()

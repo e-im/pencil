@@ -4,31 +4,34 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.User;
 import me.sulu.pencil.Pencil;
 import me.sulu.pencil.apis.pastegg.PasteGG;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class AttachmentListener {
-  private final Pencil pencil;
+public class AttachmentListener extends Listener {
+  private static final List<String> excludedExtensions = List.of(
+    ".nbt"
+  );
   private final PasteGG pasteGG;
 
   public AttachmentListener(Pencil pencil) {
-    this.pencil = pencil;
+    super(pencil);
     this.pasteGG = new PasteGG(pencil);
-    this.pencil.on(MessageCreateEvent.class, this::on).subscribe();
   }
 
   private Mono<Void> on(MessageCreateEvent event) {
     if (event.getGuildId().isEmpty()
       || event.getMessage().getAuthor().isEmpty()
       || event.getMessage().getAuthor().get().isBot()
-      || !this.pencil.config().guild(event.getGuildId().get()).features().fileUploading()) {
+      || !this.pencil().config().guild(event.getGuildId().get()).features().fileUploading()) {
       return Mono.empty();
     }
 
@@ -36,8 +39,9 @@ public class AttachmentListener {
 
     return Flux.fromIterable(event.getMessage().getAttachments())
       .publishOn(Schedulers.boundedElastic())
-      .filter(attachment -> attachment.getSize() <= 1e7)
-      .flatMap(attachment -> this.pencil.http().get()
+      .filter(a -> a.getSize() <= 1e7)
+      .filter(a -> excludedExtensions.stream().noneMatch(s -> a.getFilename().endsWith(s)))
+      .flatMap(attachment -> this.pencil().http().get()
         .uri(attachment.getUrl())
         .responseContent()
         .aggregate()
@@ -51,5 +55,10 @@ public class AttachmentListener {
         .flatMap(tuple -> tuple.getT2().createMessage("%s by %s: %s".formatted(attachment.getFilename(), author.getMention(), tuple.getT1()))
           .withMessageReference(event.getMessage().getId()))
       ).then();
+  }
+
+  @Override
+  public Disposable start() {
+    return this.on(MessageCreateEvent.class, this::on).subscribe();
   }
 }

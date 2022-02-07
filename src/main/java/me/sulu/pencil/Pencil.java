@@ -18,6 +18,7 @@ import me.sulu.pencil.commands.Google;
 import me.sulu.pencil.commands.Modmail;
 import me.sulu.pencil.listeners.*;
 import me.sulu.pencil.manager.CommandManager;
+import me.sulu.pencil.manager.ListenerManager;
 import me.sulu.pencil.util.Config;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -74,13 +75,15 @@ public class Pencil {
       new Modmail(this)
     ));
 
-    new SpamListener(this);
-    new AttachmentListener(this);
-    new VoiceStateListener(this);
-    new UserChangeListener(this);
-    new ExploitListener(this);
-    new DirectMessageListener(this);
-    new GuildListener(this);
+    new ListenerManager(Set.of(
+      new AttachmentListener(this),
+      new DirectMessageListener(this),
+      new ExploitListener(this),
+      new GuildListener(this),
+      new SpamListener(this),
+      new UserChangeListener(this),
+      new VoiceStateListener(this)
+    ));
 
     this.client().onDisconnect().block();
   }

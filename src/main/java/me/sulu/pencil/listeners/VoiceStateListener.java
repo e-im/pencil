@@ -6,21 +6,20 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.util.Color;
 import me.sulu.pencil.Pencil;
+import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 
-public class VoiceStateListener {
-  private final Pencil pencil;
+public class VoiceStateListener extends Listener {
 
   public VoiceStateListener(Pencil pencil) {
-    this.pencil = pencil;
-    this.pencil.on(VoiceStateUpdateEvent.class, this::on).subscribe();
+    super(pencil);
   }
 
   private Mono<Void> on(VoiceStateUpdateEvent event) {
-    long voiceLogId = this.pencil.config().guild(event.getCurrent().getGuildId()).channels().voiceLog();
+    long voiceLogId = this.pencil().config().guild(event.getCurrent().getGuildId()).channels().voiceLog();
     if (voiceLogId == 0L) return Mono.empty();
 
-    final RestChannel logChannel = this.pencil.client().rest().getChannelById(Snowflake.of(voiceLogId));
+    final RestChannel logChannel = this.pencil().client().rest().getChannelById(Snowflake.of(voiceLogId));
 
     return event.getCurrent().getUser()
       .flatMap(user -> {
@@ -64,5 +63,10 @@ public class VoiceStateListener {
           });
       })
       .then();
+  }
+
+  @Override
+  public Disposable start() {
+    return this.on(VoiceStateUpdateEvent.class, this::on).subscribe();
   }
 }

@@ -58,7 +58,10 @@ public class SpamManager {
           LOGGER.warn("Failed to handle update from sinking.yachts", e);
         }
       })
-      .retryWhen(Retry.backoff(10, Duration.ofSeconds(5)))
+      .retryWhen(Retry.backoff(10, Duration.ofSeconds(1))
+        .doBeforeRetry(c -> LOGGER.info("Disconnected from websocket. Retry number {}", c.totalRetries(), c.failure()))
+        .doAfterRetry(c -> LOGGER.info("Successfully reconnected to websocket"))
+        .transientErrors(true))
       .then();
 
     this.pencil.http()

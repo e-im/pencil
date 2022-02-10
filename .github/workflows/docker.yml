@@ -62,6 +62,7 @@ jobs:
         uses: docker/build-push-action@fe02965b4878556fce19e4f0aa608d7d09ed629b
         with:
           context: .
+          platforms: linux/amd64, linux/arm64/v8
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

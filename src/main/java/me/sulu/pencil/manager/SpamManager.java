@@ -17,8 +17,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.retry.Retry;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,30 +39,37 @@ public class SpamManager {
     this.pencil = pencil;
     this.safeBrowsing = new SafeBrowsing(pencil);
 
-    final Mono<Void> websocket = this.pencil.http()
-      .headers(headers -> headers.add("X-Identity", IDENTITY))
-      .websocket()
-      .uri("wss://phish.sinking.yachts/feed")
-      .receive()
-      .asByteArray()
-      .doOnNext(data -> {
-        try {
-          SinkingYachtsUpdate update = this.pencil.jsonMapper().readValue(data, SinkingYachtsUpdate.class);
-          LOGGER.info("Got update to {} {} domain(s) from sinking.yachts containing {}", update.type(), update.domains().size(), update.domains());
-          if (update.type() == SinkingYachtsUpdate.SinkingYachtsUpdateType.DELETE) {
-            this.domains.removeAll(update.domains());
-          } else {
-            this.domains.addAll(update.domains());
+    final Mono<Void> updater = Flux.interval(Duration.ofSeconds(30))
+      .flatMap(__ -> this.pencil.http()
+        .headers(headers -> headers.add("X-Identity", IDENTITY))
+        .get()
+        .uri("https://phish.sinking.yachts/v2/recent/60")
+        .responseContent()
+        .aggregate()
+        .asString()
+        .flatMapIterable(data -> {
+          try {
+            return this.pencil.jsonMapper().readTree(data);
+          } catch (IOException e) {
+            LOGGER.warn("Got invalid json from sinking.yachts {}", data);
+            throw new RuntimeException(e);
           }
-        } catch (Exception e) {
-          LOGGER.warn("Failed to handle update from sinking.yachts", e);
-        }
-      })
-      .retryWhen(Retry.backoff(10, Duration.ofSeconds(1))
-        .doBeforeRetry(c -> LOGGER.info("Disconnected from websocket. Retry number {}", c.totalRetries(), c.failure()))
-        .doAfterRetry(c -> LOGGER.info("Successfully reconnected to websocket"))
-        .transientErrors(true))
-      .then();
+        })
+        .doOnNext(data -> {
+          try {
+            SinkingYachtsUpdate update = this.pencil.jsonMapper().treeToValue(data, SinkingYachtsUpdate.class);
+            LOGGER.info("Got update to {} {} domain(s) from sinking.yachts containing {}", update.type(), update.domains().size(), update.domains());
+            if (update.type() == SinkingYachtsUpdate.SinkingYachtsUpdateType.DELETE) {
+              this.domains.removeAll(update.domains());
+            } else {
+              this.domains.addAll(update.domains());
+            }
+          } catch (Exception e) {
+            LOGGER.warn("Failed to handle update from sinking.yachts", e);
+          }
+        }))
+      .then()
+      .retry();
 
     this.pencil.http()
       .headers(headers -> headers.add("X-Identity", IDENTITY))
@@ -72,7 +79,7 @@ public class SpamManager {
       .aggregate()
       .asString()
       .doOnNext(data -> this.domains.addAll(List.of(data.split("\n"))))
-      .then(websocket)
+      .then(updater)
       .subscribe();
   }
 

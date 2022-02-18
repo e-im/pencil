@@ -84,6 +84,16 @@ public class SpamManager {
   }
 
   public Mono<Void> handle(Message message) {
+    if (message.getData().nonce().isAbsent()) {
+      LOGGER.debug("Message {} sent by {} ({}) with content {} in channel {} of guild {} has no nonce",
+        message.getId().asString(),
+        message.getAuthor().get().getTag(),
+        message.getAuthor().get().getId().asString(),
+        message.getContent(),
+        message.getChannelId().asString(),
+        message.getGuildId().orElse(Snowflake.of(0)));
+    }
+
     return check(message)
       .flatMap(response -> {
         if (response.status() != SpamResponse.SpamStatus.BAD && response.status() != SpamResponse.SpamStatus.POSSIBLE) {

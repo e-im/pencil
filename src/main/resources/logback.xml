@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true">
+<configuration scan="true" debug="true">
   <logger name="io.netty" level="INFO"/>
   <logger name="reactor" level="INFO"/>
-  <logger name="discord4j.gateway.DefaultGatewayClient" level="INFO"/>
-  <logger name="discord4j.rest.request.RequestStream" level="INFO"/>
 
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <withJansi>true</withJansi>
@@ -12,26 +10,20 @@
     </encoder>
   </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>logs/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-      <maxFileSize>2MB</maxFileSize>
-      <maxHistory>90</maxHistory>
-    </rollingPolicy>
-    <encoder>
-      <charset>UTF-8</charset>
-      <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-40.40logger{39} : %msg%n</Pattern>
-    </encoder>
-    <prudent>true</prudent>
-  </appender>
-
-  <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-    <queueSize>512</queueSize>
-    <appender-ref ref="FILE"/>
+  <appender name="GELF" class="biz.paluch.logging.gelf.logback.GelfLogbackAppender">
+    <host>udp:${GRAYLOG_HOST}</host>
+    <port>${GRAYLOG_PORT}</port>
+    <version>1.1</version>
+    <facility>pencil</facility>
+    <extractStackTrace>true</extractStackTrace>
+    <filterStackTrace>true</filterStackTrace>
+    <mdcProfiling>true</mdcProfiling>
+    <timestampPattern>yyyy-MM-dd HH:mm:ss,SSS</timestampPattern>
+    <maximumMessageSize>16384</maximumMessageSize>
   </appender>
 
   <root level="DEBUG">
+    <appender-ref ref="GELF"/>
     <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="ASYNC"/>
   </root>
 </configuration>

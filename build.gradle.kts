@@ -25,6 +25,7 @@ dependencies {
   }
 
   implementation("ch.qos.logback", "logback-classic", "1.2.10")
+  implementation("biz.paluch.logging", "logstash-gelf", "1.15.0")
 
   implementation("com.fasterxml.jackson.core", "jackson-databind", "2.13.1")
   implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.13.1")

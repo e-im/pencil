@@ -18,7 +18,7 @@ public class SpamListener extends Listener {
 
   public Mono<Void> on(MessageCreateEvent event) {
     if (event.getGuildId().isEmpty()) return Mono.empty();
-    return this.manager.handle(event.getMessage());
+    return this.manager.handle(event.getMessage(), false);
   }
 
   public Mono<Void> on(MessageUpdateEvent event) {

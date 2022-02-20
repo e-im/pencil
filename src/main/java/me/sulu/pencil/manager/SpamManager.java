@@ -83,10 +83,15 @@ public class SpamManager {
       .subscribe();
   }
 
-  public Mono<Void> handle(Message message) {
-    if (message.getData().nonce().isAbsent()) {
-      LOGGER.debug("Message {} sent by {} ({}) with content {} in channel {} of guild {} has no nonce",
+  public Mono<Void> handle(final Message message) {
+    return this.handle(message, true);
+  }
+
+  public Mono<Void> handle(final Message message, final boolean edit) {
+    if (message.getAuthor().isPresent() && !message.getAuthor().get().isBot() && message.getData().nonce().isAbsent()) {
+      LOGGER.debug("Message {} sent (edit? {}) by {} ({}) with content {} in channel {} of guild {} has no nonce",
         message.getId().asString(),
+        edit,
         message.getAuthor().get().getTag(),
         message.getAuthor().get().getId().asString(),
         message.getContent(),

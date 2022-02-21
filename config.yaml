@@ -6,10 +6,6 @@ config:
       key: ""
   domain-allowlist:
     - "google.com"
-    - "github.com"
-    - "githubusercontent.com"
-    - "raw.githubusercontent.com"
-    - "appspot.com"
     - "pastebin.com"
     - "paste.gg"
     - "pastes.dev"

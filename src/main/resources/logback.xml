@@ -9,21 +9,7 @@
       <pattern>%cyan(%d{HH:mm:ss.SSS}) %gray([%thread]) %highlight(%-5level) %magenta(%logger{36}) - %msg%n</pattern>
     </encoder>
   </appender>
-
-  <appender name="GELF" class="biz.paluch.logging.gelf.logback.GelfLogbackAppender">
-    <host>udp:${GRAYLOG_HOST}</host>
-    <port>${GRAYLOG_PORT}</port>
-    <version>1.1</version>
-    <facility>pencil</facility>
-    <extractStackTrace>true</extractStackTrace>
-    <filterStackTrace>true</filterStackTrace>
-    <mdcProfiling>true</mdcProfiling>
-    <timestampPattern>yyyy-MM-dd HH:mm:ss,SSS</timestampPattern>
-    <maximumMessageSize>16384</maximumMessageSize>
-  </appender>
-
   <root level="DEBUG">
-    <appender-ref ref="GELF"/>
     <appender-ref ref="CONSOLE"/>
   </root>
 </configuration>

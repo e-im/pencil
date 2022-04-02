@@ -14,6 +14,7 @@ import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.gateway.intent.IntentSet;
 import discord4j.rest.util.AllowedMentions;
+import me.sulu.pencil.commands.Docs;
 import me.sulu.pencil.commands.Google;
 import me.sulu.pencil.commands.Modmail;
 import me.sulu.pencil.listeners.*;
@@ -72,7 +73,8 @@ public class Pencil {
 
     new CommandManager(this, Set.of(
       new Google(this),
-      new Modmail(this)
+      new Modmail(this),
+      new Docs(this)
     ));
 
     new ListenerManager(Set.of(

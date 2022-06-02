@@ -1,5 +1,6 @@
 plugins {
   id("com.github.johnrengelman.shadow") version "7.1.0"
+  id("com.google.cloud.tools.jib") version "3.2.1"
   id("application")
   id("java")
 }
@@ -25,7 +26,6 @@ dependencies {
   }
 
   implementation("ch.qos.logback", "logback-classic", "1.2.10")
-  implementation("biz.paluch.logging", "logstash-gelf", "1.15.0")
 
   implementation("com.fasterxml.jackson.core", "jackson-databind", "2.13.1")
   implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.13.1")
@@ -49,5 +49,27 @@ tasks {
 java {
   toolchain {
     languageVersion.set(JavaLanguageVersion.of(17))
+  }
+}
+
+jib {
+  from {
+    platforms {
+      platform {
+        architecture = "amd64"
+        os = "linux"
+      }
+      platform {
+        architecture = "arm64"
+        os = "linux"
+      }
+    }
+  }
+  to {
+    image = "ghcr.io/papermc/pencil"
+    auth {
+      username = System.getenv("USERNAME")
+      password = System.getenv("PASSWORD")
+    }
   }
 }

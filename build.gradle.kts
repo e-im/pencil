@@ -72,4 +72,7 @@ jib {
       password = System.getenv("PASSWORD")
     }
   }
+  container {
+    workingDirectory = "/pencil"
+  }
 }

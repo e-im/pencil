@@ -5,13 +5,9 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import discord4j.core.event.domain.interaction.ChatInputAutoCompleteEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.command.ApplicationCommandOptionChoice;
-import discord4j.core.object.component.SelectMenu;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.Color;
 import me.sulu.pencil.Pencil;
 import me.sulu.pencil.apis.docs.DocItem;
 import me.sulu.pencil.apis.docs.DocSearch;
@@ -19,11 +15,9 @@ import me.sulu.pencil.util.StringUtil;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
-public class Docs extends Command{
+public class Docs extends Command {
   private final ApplicationCommandRequest request = ApplicationCommandRequest.builder()
     .name("docs")
     .description("Search the PaperMC docs")
@@ -53,12 +47,8 @@ public class Docs extends Command{
     DocItem item = cache.getIfPresent(term);
 
     if (item == null) {
-      return search.search(term).flatMap(result -> {
-        if (result.length == 0) return event.reply("No results found for " + term);
-        return event.reply(result[0].url());
-      });
+      return search.search(term).sampleFirst(r -> event.reply(r.url())).then();
     }
-
     return event.reply(item.url());
   }
 
@@ -69,22 +59,15 @@ public class Docs extends Command{
       return event.respondWithSuggestions(Collections.emptyList());
     }
 
-    return this.search.search(term).flatMap(result -> {
-      if (result.length == 0) return event.respondWithSuggestions(Collections.emptyList());
-      final List<ApplicationCommandOptionChoiceData> choices = new ArrayList<>();
-
-      for (DocItem item : result) {
-        choices.add(ApplicationCommandOptionChoiceData.builder()
-          .name(StringUtil.left(item.name() + " - " + item.content(), 100))
-          .value(item.id())
-          .build());
-
-        cache.put(item.id(), item);
-      }
-
-      return event.respondWithSuggestions(choices);
-    });
-
+    return this.search.search(term)
+      .doOnNext(next -> cache.put(String.valueOf(next.hashCode()), next)) // this is awful, but also...
+      .map(item -> ApplicationCommandOptionChoiceData.builder()
+        .name(StringUtil.left(item.url(), 100))
+        .value(String.valueOf(item.hashCode()))
+        .build())
+      .cast(ApplicationCommandOptionChoiceData.class)
+      .collectList()
+      .flatMap(event::respondWithSuggestions);
   }
 
   @Override

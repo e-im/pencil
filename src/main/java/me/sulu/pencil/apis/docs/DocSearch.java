@@ -1,32 +1,27 @@
 package me.sulu.pencil.apis.docs;
 
+import com.algolia.search.DefaultSearchClient;
+import com.algolia.search.SearchIndex;
+import com.algolia.search.models.indexing.Query;
+import com.algolia.search.models.indexing.SearchResult;
 import me.sulu.pencil.Pencil;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 public class DocSearch {
+  private final SearchIndex search;
   private final Pencil pencil;
 
   public DocSearch(final Pencil pencil) {
     this.pencil = pencil;
+
+    this.search = DefaultSearchClient.create(this.pencil.config().global().secrets().algoliaSearch().applicationId(), this.pencil.config().global().secrets().algoliaSearch().apiKey())
+      .initIndex(this.pencil.config().global().secrets().algoliaSearch().index(), DocItem.class);
   }
 
-  public Mono<DocItem[]> search(final String term) {
-    return this.pencil.http().get()
-      .uri("https://docs-search.evan.workers.dev/search/" + URLEncoder.encode(term, StandardCharsets.UTF_8))
-      .responseContent()
-      .aggregate()
-      .asString()
-      .map(data -> {
-        try {
-          System.out.println(data);
-          return this.pencil.jsonMapper().readValue(data, DocItem[].class);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      });
+  public Flux<DocItem> search(final String term) {
+    return Mono.just(search.search(new Query(term)))
+      .flatMapIterable(SearchResult::getHits)
+      .cast(DocItem.class);
   }
 }

@@ -153,12 +153,24 @@ public class Config {
       @JsonProperty("pastegg-key")
       String pasteggKey,
       @JsonProperty("custom-search")
-      CustomSearch customSearch
+      CustomSearch customSearch,
+      @JsonProperty("algolia-search")
+      AlgoliaSearch algoliaSearch
     ) {
       public record CustomSearch(
         String cx,
         String key
       ) {
+      }
+
+      public record AlgoliaSearch(
+        @JsonProperty("application-id")
+        String applicationId,
+        @JsonProperty("api-key")
+        String apiKey,
+        String index
+      ) {
+
       }
     }
   }

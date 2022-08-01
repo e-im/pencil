@@ -20,10 +20,13 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j", "discord4j-core", "3.3.0-SNAPSHOT") {
+  implementation("com.discord4j", "discord4j-core", "3.3.0-20220730.193136-54") {
     exclude("com.fasterxml")
     exclude("com.github.ben-manes.caffeine")
   }
+
+  implementation("com.algolia", "algoliasearch-core", "3.16.5")
+  implementation("com.algolia", "algoliasearch-java-net", "3.16.5")
 
   implementation("ch.qos.logback", "logback-classic", "1.2.10")
 

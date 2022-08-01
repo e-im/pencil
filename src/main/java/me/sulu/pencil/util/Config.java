@@ -112,8 +112,22 @@ public class Config {
       boolean fileUploading,
       @JsonProperty("name-normalization")
       NameNormalization nameNormalization,
-      Phishing phishing
+      Phishing phishing,
+      @JsonProperty("xf-link")
+      XfLink xfLink
     ) {
+
+      public record XfLink(
+        @JsonProperty("xf-base-url")
+        String xfBaseUrl,
+        @JsonProperty("xf-api-key")
+        String xfApiKey,
+        @JsonProperty("thread-id")
+        int threadId,
+        @JsonProperty("channel-id")
+        String channelId
+      ) {}
+
       public record NameNormalization(
         boolean normalize,
         boolean aggressive,

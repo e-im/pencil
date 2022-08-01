@@ -84,7 +84,8 @@ public class Pencil {
       new GuildListener(this),
       new SpamListener(this),
       new UserChangeListener(this),
-      new VoiceStateListener(this)
+      new VoiceStateListener(this),
+      new XfLink(this)
     ));
 
     this.client().onDisconnect().block();

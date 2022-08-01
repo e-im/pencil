@@ -81,3 +81,8 @@ guilds:
         domain-spam:
           channels: 2
           uniques: 3
+      xf-link:
+        xf-base-url: https://forums.papermc.io
+        xf-api-key: ""
+        thread-id: 304
+        channel-id: "1003752997530112071"

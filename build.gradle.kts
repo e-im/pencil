@@ -69,7 +69,7 @@ jib {
     }
   }
   to {
-    image = "ghcr.io/papermc/pencil"
+    image = "ghcr.io/e-im/pencil"
     auth {
       username = System.getenv("USERNAME")
       password = System.getenv("PASSWORD")

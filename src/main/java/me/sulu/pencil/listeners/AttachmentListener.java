@@ -3,7 +3,7 @@ package me.sulu.pencil.listeners;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.User;
 import me.sulu.pencil.Pencil;
-import me.sulu.pencil.apis.pastegg.PasteGG;
+import me.sulu.pencil.apis.paste.Paste;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,11 +20,11 @@ public class AttachmentListener extends Listener {
   private static final List<String> excludedExtensions = List.of(
     ".nbt"
   );
-  private final PasteGG pasteGG;
+  private final Paste paste;
 
   public AttachmentListener(Pencil pencil) {
     super(pencil);
-    this.pasteGG = new PasteGG(pencil);
+    this.paste = new Paste(pencil);
   }
 
   private Mono<Void> on(MessageCreateEvent event) {
@@ -50,7 +50,7 @@ public class AttachmentListener extends Listener {
         .onErrorResume(TimeoutException.class, ignored -> Mono.empty())
         .zipWhen(bytes -> Mono.just(new String(bytes, UTF_8)))
         .filter(tuple -> Arrays.equals(tuple.getT1(), tuple.getT2().getBytes(UTF_8))) // Checks if this is actually something we want to pastebin. TODO: Find something better/faster?
-        .flatMap(content -> this.pasteGG.pastebin("Content by %s (%s)".formatted(author.getTag(), author.getId().asString()), "", attachment.getFilename(), content.getT2()))
+        .flatMap(content -> this.paste.paste(attachment.getContentType().orElse("text/plain"), content.getT2()))
         .zipWith(event.getMessage().getChannel())
         .flatMap(tuple -> tuple.getT2().createMessage("%s by %s: %s".formatted(attachment.getFilename(), author.getMention(), tuple.getT1()))
           .withMessageReference(event.getMessage().getId()))

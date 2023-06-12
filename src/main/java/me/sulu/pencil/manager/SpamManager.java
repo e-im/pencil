@@ -59,7 +59,7 @@ public class SpamManager {
 
     return check(message)
       .flatMap(response -> {
-        if (response.classification() != SpamResponse.Classification.BAD && response.classification() != SpamResponse.Classification.POSSIBLE) {
+        if (response.classification() != SpamResponse.Classification.BAD) {
           return Mono.empty();
         }
         return caught(message, response);

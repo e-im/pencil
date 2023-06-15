@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j", "discord4j-core", "3.3.0-20220730.193136-54") {
+  implementation("com.discord4j", "discord4j-core", "3.3.0-20230615.062109-106") {
     exclude("com.fasterxml")
     exclude("com.github.ben-manes.caffeine")
   }

@@ -1,6 +1,6 @@
 plugins {
-  id("com.github.johnrengelman.shadow") version "7.1.0"
-  id("com.google.cloud.tools.jib") version "3.2.1"
+  id("com.gradleup.shadow") version "8.3.5"
+  id("com.google.cloud.tools.jib") version "3.4.4"
   id("application")
   id("java")
 }
@@ -20,23 +20,23 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j", "discord4j-core", "3.3.0-20230615.062109-106") {
+  implementation("com.discord4j", "discord4j-core", "3.3.0-RC1") {
     exclude("com.fasterxml")
     exclude("com.github.ben-manes.caffeine")
   }
 
-  implementation("com.algolia", "algoliasearch-core", "3.16.5")
-  implementation("com.algolia", "algoliasearch-java-net", "3.16.5")
+  implementation("com.algolia", "algoliasearch-core", "3.16.10")
+  implementation("com.algolia", "algoliasearch-java-net", "3.16.10")
 
-  implementation("ch.qos.logback", "logback-classic", "1.2.10")
+  implementation("ch.qos.logback", "logback-classic", "1.5.12")
 
-  implementation("com.fasterxml.jackson.core", "jackson-databind", "2.13.1")
-  implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.13.1")
-  implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", "2.13.1")
+  implementation("com.fasterxml.jackson.core", "jackson-databind", "2.18.1")
+  implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.18.1")
+  implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", "2.18.1")
 
-  implementation("com.github.ben-manes.caffeine", "caffeine", "3.0.5")
+  implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.8")
 
-  implementation("com.github.anyascii", "anyascii", "0.3.0")
+  implementation("com.github.anyascii", "anyascii", "0.3.2")
 }
 
 tasks {
@@ -51,7 +51,7 @@ tasks {
 
 java {
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
+    languageVersion.set(JavaLanguageVersion.of(21))
   }
 }
 

@@ -25,7 +25,7 @@ dependencies {
     exclude("com.github.ben-manes.caffeine")
   }
 
-  implementation("com.algolia:algoliasearch:4.15.4")
+  implementation("com.algolia", "algoliasearch", "4.15.4")
 
   implementation("ch.qos.logback", "logback-classic", "1.5.12")
 

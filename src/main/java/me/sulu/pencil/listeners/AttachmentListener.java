@@ -1,7 +1,9 @@
 package me.sulu.pencil.listeners;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.MessageReference;
 import discord4j.core.object.entity.User;
+import discord4j.discordjson.json.MessageReferenceData;
 import me.sulu.pencil.Pencil;
 import me.sulu.pencil.apis.paste.Paste;
 import reactor.core.Disposable;
@@ -53,7 +55,7 @@ public class AttachmentListener extends Listener {
         .flatMap(content -> this.paste.paste(attachment.getContentType().orElse("text/plain"), content.getT2()))
         .zipWith(event.getMessage().getChannel())
         .flatMap(tuple -> tuple.getT2().createMessage("%s by %s: %s".formatted(attachment.getFilename(), author.getMention(), tuple.getT1()))
-          .withMessageReference(event.getMessage().getId()))
+          .withMessageReference(MessageReferenceData.builder().type(MessageReference.Type.DEFAULT.getValue()).guildId(tuple.getT2().getData().guildId()).channelId(tuple.getT2().getId().asLong()).messageId(event.getMessage().getId().asLong()).build()))
       ).then();
   }
 

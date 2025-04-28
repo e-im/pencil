@@ -3,6 +3,7 @@ plugins {
   id("com.google.cloud.tools.jib") version "3.4.4"
   id("application")
   id("java")
+  id("org.checkerframework") version "0.6.53"
 }
 
 application {
@@ -20,20 +21,20 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j", "discord4j-core", "3.3.0-RC1") {
+  implementation("com.discord4j", "discord4j-core", "3.3.0-20250428.030557-177") {
     exclude("com.fasterxml")
     exclude("com.github.ben-manes.caffeine")
   }
 
   implementation("com.algolia", "algoliasearch", "4.15.4")
 
-  implementation("ch.qos.logback", "logback-classic", "1.5.12")
+  implementation("ch.qos.logback", "logback-classic", "1.5.18")
 
   implementation("com.fasterxml.jackson.core", "jackson-databind", "2.18.1")
   implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.18.1")
   implementation("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", "2.18.1")
 
-  implementation("com.github.ben-manes.caffeine", "caffeine", "3.1.8")
+  implementation("com.github.ben-manes.caffeine", "caffeine", "3.2.0")
 
   implementation("com.github.anyascii", "anyascii", "0.3.2")
 }

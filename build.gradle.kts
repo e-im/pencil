@@ -11,7 +11,7 @@ application {
 
 repositories {
   mavenCentral()
-  maven("https://oss.sonatype.org/content/repositories/snapshots/")
+  maven("https://central.sonatype.com/repository/maven-snapshots/")
   maven("https://jitpack.io") {
     content {
       includeGroup("com.github.anyascii")
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j", "discord4j-core", "3.3.0-RC1") {
+  implementation("com.discord4j", "discord4j-core", "3.3.0") {
     exclude("com.fasterxml")
     exclude("com.github.ben-manes.caffeine")
   }
